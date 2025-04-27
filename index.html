@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Daily Report Sales Beras KAR</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.6/dist/umd/supabase.min.js"></script>
+
+
+</head>
+<body onload="getLocation()">
+    <form id="formKunjungan" onsubmit="handleSubmit(event)">
+        <h2 style="text-align: center;">Daily Report Sales Beras KAR</h2>
+        <div>
+          <label for="nama_sales">Nama Sales:</label>
+          <select name="nama_sales" id="nama_sales" class="w-full border p-2 rounded" required>
+            <option value="">-- Pilih Nama Sales --</option>
+            <option value="Zayadi">Zayadi</option>
+            <option value="Wisnu">Wisnu</option>
+            <option value="Fahmi">Fahmi</option>
+            <option value="Aiko">Aiko</option>
+            <option value="Bayu">Bayu</option>
+            <option value="Surya">Surya</option>
+          </select>
+        </div>
+
+        <div><label>Tanggal Kunjungan:</label><input type="date" id="tanggal_kunjungan"  name="tanggal_kunjungan" class="w-full border p-2 rounded" required></div>
+
+        <div>
+            <label for="kategori_toko">Kategori Toko:</label>
+            <select name="kategori_toko" id="kategori_toko" class="w-full border p-2 rounded" required>
+              <option value="">-- Pilih Kategori Toko --</option>
+              <option value="Toko Beras">Toko Beras</option>
+              <option value="Agen Beras">Agen Beras</option>
+              <option value="Toko Sembako">Toko Sembako</option>
+              <option value="Agen Sembako">Agen Sembako</option>
+            </select>
+          </div>
+
+          <div><label>Nama Toko/Agen:</label><input type="text" id="nama_toko" name="nama_toko" class="w-full border p-2 rounded"></div>
+
+          <div class="mb-3">
+            <label class="block mb-1">Status Toko/Agen:</label>
+            <div class="flex gap-4">
+              <label class="flex items-center">
+                <input type="radio" id="statusExisting" name="status_toko" value="Existing" required class="mr-2">
+                Existing
+              </label>
+              <label class="flex items-center">
+                <input type="radio" id="statusProspect" name="status_toko" value="Prospect" class="mr-2">
+                Prospect
+              </label>
+            </div>
+          </div>
+          
+          
+
+          <div class="mb-4">
+            <label for="provinsi" class="block mb-1">Provinsi:</label>
+            <select name="provinsi" id="provinsi" class="w-full border p-2 rounded" required>
+              <option value="">-- Provinsi --</option>
+              <option value="DKI Jakarta">DKI Jakarta</option>
+              <option value="Jawa Barat">Jawa Barat</option>
+              <option value="Jawa Timur">Jawa Timur</option>
+              <option value="Banten">Banten</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="kota_kabupaten" class="block mb-1">Kota/Kabupaten:</label>
+            <select name="kota_kabupaten" id="kota_kabupaten" class="w-full border p-2 rounded" required>
+              <option value="">-- Pilih Kota/Kabupaten --</option>
+            </select>
+          </div>
+          
+          <script>
+            const cityOptions = {
+              "DKI Jakarta": [
+                "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Utara", "Jakarta Timur"
+              ],
+              "Jawa Barat": [
+                "Kabupaten Bandung", "Kabupaten Bandung Barat", "Kabupaten Bekasi", "Kabupaten Bogor",
+                "Kabupaten Ciamis", "Kabupaten Cianjur", "Kabupaten Cirebon", "Kabupaten Garut",
+                "Kabupaten Indramayu", "Kabupaten Karawang", "Kabupaten Kuningan", "Kabupaten Majalengka",
+                "Kabupaten Pangandaran", "Kabupaten Purwakarta", "Kabupaten Subang", "Kabupaten Sukabumi",
+                "Kabupaten Sumedang", "Kabupaten Tasikmalaya",
+                "Kota Bandung", "Kota Banjar", "Kota Bekasi", "Kota Bogor",
+                "Kota Cimahi", "Kota Cirebon", "Kota Depok", "Kota Sukabumi", "Kota Tasikmalaya"
+              ],
+              "Jawa Timur": [
+                "Kabupaten Bangkalan", "Kabupaten Banyuwangi", "Kabupaten Blitar", "Kabupaten Bojonegoro",
+                "Kabupaten Bondowoso", "Kabupaten Gresik", "Kabupaten Jember", "Kabupaten Jombang",
+                "Kabupaten Kediri", "Kabupaten Lamongan", "Kabupaten Lumajang", "Kabupaten Madiun",
+                "Kabupaten Magetan", "Kabupaten Malang", "Kabupaten Mojokerto", "Kabupaten Nganjuk",
+                "Kabupaten Ngawi", "Kabupaten Pacitan", "Kabupaten Pamekasan", "Kabupaten Pasuruan",
+                "Kabupaten Ponorogo", "Kabupaten Probolinggo", "Kabupaten Sampang", "Kabupaten Sidoarjo",
+                "Kabupaten Situbondo", "Kabupaten Sumenep", "Kabupaten Trenggalek", "Kabupaten Tuban",
+                "Kabupaten Tulungagung", "Kota Batu", "Kota Blitar", "Kota Kediri", "Kota Madiun",
+                "Kota Malang", "Kota Mojokerto", "Kota Pasuruan", "Kota Probolinggo", "Kota Surabaya"
+              ],
+              "Banten": [
+                "Kabupaten Lebak", "Kabupaten Pandeglang", "Kabupaten Serang", "Kabupaten Tangerang",
+                "Kota Cilegon", "Kota Serang", "Kota Tangerang", "Kota Tangerang Selatan"
+              ],
+            };
+          
+            const provinsiSelect = document.getElementById("provinsi");
+            const citySelect = document.getElementById("kota_kabupaten");
+          
+            // Mulai dengan nonaktifkan city dropdown
+            citySelect.disabled = true;
+          
+            provinsiSelect.addEventListener("change", function () {
+              const selectedProvinsi = this.value;
+              const cities = cityOptions[selectedProvinsi] || [];
+          
+              // Reset dropdown kota
+              citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+          
+              if (cities.length > 0) {
+                citySelect.disabled = false;
+                cities.forEach(function (kota_kabupaten) {
+                  const option = document.createElement("option");
+                  option.value = kota_kabupaten;
+                  option.textContent = kota_kabupaten;
+                  citySelect.appendChild(option);
+                });
+              } else {
+                citySelect.disabled = true;
+              }
+            });
+          </script>
+          
+          <div>
+            <label>Kecamatan:</label>
+            <input type="text" id="kecamatan" name="kecamatan" class="w-full border p-2 rounded" required>
+          </div>
+              
+          <div>
+            <label>Kelurahan:</label>
+            <input type="text" id="kelurahan" name="kelurahan" class="w-full border p-2 rounded">
+          </div>
+          
+          <div>
+            <label>Nama PIC:</label>
+            <input type="text" id="nama_pic" name="nama_pic" class="w-full border p-2 rounded" required style="text-transform: capitalize;">
+          </div>
+          
+          <div>
+            <label>Nomor PIC:</label>
+            <input 
+              type="tel" 
+              id="no_pic" 
+              name="no_pic" 
+              class="w-full border p-2 rounded" 
+              placeholder="Contoh: 081234567890" 
+              pattern="[0-9]{10,15}" 
+              required 
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          </div>
+          
+          <div>
+            <label for="kegiatan">Kegiatan:</label>
+            <select name="kegiatan" id="kegiatan" required class="w-full border p-2 rounded">
+                <option value="">-- Pilih Kegiatan --</option>
+                <option value="Penawaran & Pemberian Brosur">Penawaran & Pemberian Brosur</option>
+                <option value="Penjualan">Penjualan</option>
+                <option value="Cek Stock">Cek Stock</option>
+                <option value="Penagihan">Penagihan</option>
+                <option value="Kirim Barang">Kirim Barang</option>
+              </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label>Deskripsi Kegiatan:</label>
+            <textarea id="deskripsi_kegiatan" name="deskripsi_kegiatan" class="w-full border p-2 rounded"></textarea>
+          </div>
+
+          <div><label for="kgberas_penjualanBerasToko">Penjualan Beras Toko per Bulan (Kg):</label><input type="number" id="kgberas_penjualanBerasToko" name="kgberas_penjualanBerasToko" class="w-full border p-2 rounded"></div>
+
+          <div><label>Produk Pesaing:</label><input type="text" id="produk_pesaing" name="produk_pesaing" class="w-full border p-2 rounded"></div>
+
+          <div><label for="kg_produkpesaing">Ukuran Kemasan Produk Pesaing (Kg):</label><input type="number" id="kg_produkpesaing" name="kg_produkpesaing" class="w-full border p-2 rounded" required></div>
+
+          <div>
+            <label for="harga_produkpesaing">Harga Produk Pesaing:</label>
+            <input 
+              type="text" 
+              id="harga_produkpesaing" 
+              name="harga_produkpesaing" 
+              class="w-full border p-2 rounded" 
+              placeholder="Masukkan Info Harga Produk Pesaing"
+              required
+              pattern="^\d+(\.\d{1,2})?$"
+              title="Masukkan harga dengan format yang benar (misalnya: 1000 atau 1000.50). Hanya angka yang diperbolehkan."
+              oninput="this.value=this.value.replace(/[^0-9.]/g,'');"
+            >
+          </div>
+          <div class="md:col-span-2">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="rincianPO_UnGlu5kg_pack">Rincian PO [Un-Glu 5 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_UnGlu5kg_pack" name="rincianPO_UnGlu5kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+          
+              <div>
+                <label for="rincianPO_Segowangi5kg_pack">Rincian PO [Segowangi 5 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_Segowangi5kg_pack" name="rincianPO_Segowangi5kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+          
+              <div>
+                <label for="rincianPO_Segowangi2_5kg_pack">Rincian PO [Segowangi 2,5 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_Segowangi2_5kg_pack" name="rincianPO_Segowangi2_5kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+          
+              <div>
+                <label for="rincianPO_CapSego10kg_pack">Rincian PO [Cap Sego 10 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_CapSego10kg_pack" name="rincianPO_CapSego10kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+          
+              <div>
+                <label for="rincianPO_Medium25kg_pack">Rincian PO [Medium 25 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_Medium25kg_pack" name="rincianPO_Medium25kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+          
+              <div>
+                <label for="rincianPO_Medium50kg_pack">Rincian PO [Medium 50 Kg]/Pack:</label>
+                <input type="text" id="rincianPO_Medium50kg_pack" name="rincianPO_Medium50kg_pack" placeholder="Masukkan Jumlah Pack" required>
+              </div>
+            </div>
+          </div>
+          
+          <script>
+            function setupQtyValidation(inputId) {
+              const input = document.getElementById(inputId);
+          
+              input.addEventListener("input", function () {
+                // Cek jika ada karakter selain angka
+                if (/[^0-9]/.test(input.value)) {
+                  // Hapus karakter non-angka
+                  input.value = input.value.replace(/[^0-9]/g, '');
+                }
+              });
+            }
+          
+            // Menyiapkan validasi untuk setiap input
+            setupQtyValidation("rincianPO_UnGlu5kg_pack");
+            setupQtyValidation("rincianPO_Segowangi5kg_pack");
+            setupQtyValidation("rincianPO_Segowangi2_5kg_pack");
+            setupQtyValidation("rincianPO_CapSego10kg_pack");
+            setupQtyValidation("rincianPO_Medium25kg_pack");
+            setupQtyValidation("rincianPO_Medium50kg_pack");
+          </script>
+
+          <div><label>Foto Depan Toko:</label><input type="file" id="foto_toko" name="foto_toko" accept="image/*" required></div>
+    
+          <input type="hidden" name="latitude" id="latitude">
+          <input type="hidden" name="longitude" id="longitude">
+          <input type="hidden" name="fotoURL" id="fotoURL">
+          <input type="hidden" name="lokasi_toko" id="lokasi_toko" required>
+          <br><br>
+          <button type="submit">Kirim</button>
+    </form>
+    <script>
+      // Handle location capture
+      function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                }, function(error) {
+                    alert("Geolocation failed: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+
+</body>
+</html>
